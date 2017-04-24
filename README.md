@@ -15,6 +15,8 @@ The simulator outputs a summary of the main base station statistics:
 
     - Average power consumption (in Watts and normalized)
 
+    - Transitions rate (in number of transitions per hour)
+
 With option -v, the simulator outputs a line for every simulated event:
 
     `event_time event_type event_info`

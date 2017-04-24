@@ -36,7 +36,7 @@ public class BaseStation {
     private BaseStationState state;
 
     // Statistics variables
-    private long tasks_received, tasks_served, tasks_discarded;
+    private long tasks_received, tasks_served, tasks_discarded, num_transitions;
     private double sum_tasks_delay, maximum_task_delay;
     private double last_state_transition_time;
     private long tasks_received_in_current_cycle;
@@ -67,7 +67,7 @@ public class BaseStation {
 	EnergyAwareBaseStationSimulator.event_handler.addEvent(new StateTransitionEvent (0, "handleStateTransitionEvent", state));
 	EnergyAwareBaseStationSimulator.event_handler.addEvent(new StateTransitionEvent (EnergyAwareBaseStationSimulator.inactivity_t, "handleStateTransitionEvent", BaseStationState.TRANSITION_TO_SLEEP));
 
-	tasks_received = tasks_served = tasks_discarded = 0;
+	tasks_received = tasks_served = tasks_discarded = num_transitions = 0;
 	sum_tasks_delay = maximum_task_delay = 0.0;
 	tasks_received_in_current_cycle = 0;
 	prev_cycle_end_time = 0.0;
@@ -199,6 +199,7 @@ public class BaseStation {
 	    } else {
 		EnergyAwareBaseStationSimulator.event_handler.addEvent(new StateTransitionEvent (event.time + EnergyAwareBaseStationSimulator.sleep_to_active_t, "handleStateTransitionEvent", BaseStationState.ACTIVE_SERVE));
 	    }
+	    num_transitions++;
 	} else if (event.new_state == BaseStationState.SLEEP) {
 	    if (EnergyAwareBaseStationSimulator.scheme.equals("coalescing")) {
 		if (queue_size >= EnergyAwareBaseStationSimulator.sleep_to_active_qth) {
@@ -245,5 +246,6 @@ public class BaseStation {
 	} else {
 	    System.out.format("Average coalescing threshold: %d %n", EnergyAwareBaseStationSimulator.sleep_to_active_qth);
 	}
+	System.out.format("Transitions rate: %.4f %n", num_transitions * 3600.0 / EnergyAwareBaseStationSimulator.simulation_length);
     }
 }
