@@ -70,6 +70,8 @@ public final class EnergyAwareBaseStationSimulator {
 	String service_time_distribution = "deterministic";
 	double service_time = 1; // in seconds
 	double alpha_pareto = 2.5; // if pareto task distribution
+	double rate_step = 0.05; // in tasks per second (if dynamic poisson task distribution)
+	double time_step = 3600; // in seconds (if dynamic poisson task distribution)
 	double uniform_range = 1; // in seconds (if uniform service time distribution)
 
 	// Arguments parsing
@@ -112,7 +114,7 @@ public final class EnergyAwareBaseStationSimulator {
 		    } else {
 			String[] line_fields = line.split("\\s+");
 			if (line_fields[0].equals("TASKS")) {
-			    if (line_fields[1].equals("deterministic") || line_fields[1].equals("poisson") || line_fields[1].equals("pareto")) {
+			    if (line_fields[1].equals("deterministic") || line_fields[1].equals("poisson") || line_fields[1].equals("pareto") || line_fields[1].equals("dynpoisson")) {
 				task_distribution = line_fields[1];
 			    } else {
 				printError("Config file: invalid task distribution!");
@@ -133,6 +135,21 @@ public final class EnergyAwareBaseStationSimulator {
 				}
 				if (alpha_pareto <= 1) {
 				    printError("Config file: invalid alpha pareto parameter!");
+				}
+			    }
+			    if (line_fields[1].equals("dynpoisson")) {
+				try {
+				    rate_step = Double.parseDouble(line_fields[3]);
+				} catch (NumberFormatException e) {
+				    printError("Config file: invalid rate step parameter!");
+				}
+				try {
+				    time_step = Double.parseDouble(line_fields[4]);
+				} catch (NumberFormatException e) {
+				    printError("Config file: invalid time step parameter!");
+				}				
+				if (time_step <= 0) {
+				    printError("Config file: invalid time step parameter!");
 				}
 			    }
 			} else if (line_fields[0].equals("SERVICE")) {
@@ -235,8 +252,11 @@ public final class EnergyAwareBaseStationSimulator {
 	    tg = new PoissonTaskGenerator(arrival_rate);
 	} else if (task_distribution.equals("pareto")) {
 	    tg = new ParetoTaskGenerator(arrival_rate, alpha_pareto);
-	}
+	} else if (task_distribution.equals("dynpoisson")) {
+	    tg = new DynPoissonTaskGenerator(arrival_rate, rate_step, time_step);
+	}   
 	tg.setSeed(simulation_seed);
+	
 	ServiceTimeGenerator stg = null;
 	if (service_time_distribution.equals("deterministic")) {
 	    stg = new DeterministicServiceTimeGenerator(service_time);
