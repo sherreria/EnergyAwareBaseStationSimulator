@@ -148,9 +148,6 @@ public class BaseStation {
             maximum_task_delay = current_task_delay;
         }
         sum_tasks_delay += current_task_delay;
-	if (EnergyAwareBaseStationSimulator.simulation_verbose) {
-            event.print();
-        }
 	if (queue_size > 0) {
 	    TaskArrivalEvent next_task = (TaskArrivalEvent) (queue.getNextEvent(false));
 	    double task_stime = next_task.task_stime;
@@ -171,6 +168,9 @@ public class BaseStation {
 	    }
 	    EnergyAwareBaseStationSimulator.event_handler.addEvent(new StateTransitionEvent (event.time + EnergyAwareBaseStationSimulator.inactivity_t, "handleStateTransitionEvent", BaseStationState.TRANSITION_TO_SLEEP));
 	}
+	if (EnergyAwareBaseStationSimulator.simulation_verbose) {
+            event.print();
+        }
     }
 
     /**

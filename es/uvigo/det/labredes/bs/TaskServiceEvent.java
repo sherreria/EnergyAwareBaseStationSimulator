@@ -54,6 +54,6 @@ public class TaskServiceEvent extends Event<BaseStation> {
      * Prints on standard output a message describing the task service event.
      */
     public void print () {
-	System.out.format("%.3f TaskServiceEvent %d %d %n", time, task_id, EnergyAwareBaseStationSimulator.bs.queue_size);
+	System.out.format("%.3f TaskServiceEvent %d %d %d%n", time, task_id, EnergyAwareBaseStationSimulator.bs.queue_size, EnergyAwareBaseStationSimulator.sleep_to_active_qth);
     }
 }
