@@ -73,6 +73,7 @@ public final class EnergyAwareBaseStationSimulator {
 	double rate_step = 0.05; // in tasks per second (if dynamic poisson task distribution)
 	double time_step = 3600; // in seconds (if dynamic poisson task distribution)
 	double uniform_range = 1; // in seconds (if uniform service time distribution)
+	double var_service_time = 1; // in seconds^2 (if lognormal service time distribution)
 
 	// Arguments parsing
 	for (int i = 0; i < args.length; i++) {
@@ -153,7 +154,7 @@ public final class EnergyAwareBaseStationSimulator {
 				}
 			    }
 			} else if (line_fields[0].equals("SERVICE")) {
-			    if (line_fields[1].equals("deterministic") || line_fields[1].equals("uniform") || line_fields[1].equals("exponential")) {
+			    if (line_fields[1].equals("deterministic") || line_fields[1].equals("uniform") || line_fields[1].equals("exponential") || line_fields[1].equals("lognormal")) {
 				service_time_distribution = line_fields[1];
 			    } else {
 				printError("Config file: invalid service time distribution!");
@@ -174,6 +175,16 @@ public final class EnergyAwareBaseStationSimulator {
 				}
 				if (uniform_range <= 0 || service_time - uniform_range/2.0 <= 0) {
 				    printError("Config file: invalid uniform range length!");
+				}
+			    }
+			    if (line_fields[1].equals("lognormal")) {
+				try {
+				    var_service_time = Double.parseDouble(line_fields[3]);
+				} catch (NumberFormatException e) {
+				    printError("Config file: invalid service time variance!");
+				}
+				if (var_service_time <= 0) {
+				    printError("Config file: invalid service time variance!");
 				}
 			    }
 			} else if (line_fields[0].equals("POWER")) {
@@ -264,6 +275,8 @@ public final class EnergyAwareBaseStationSimulator {
 	    stg = new UniformServiceTimeGenerator(service_time, uniform_range);
 	} else if (service_time_distribution.equals("exponential")) {
 	    stg = new ExponentialServiceTimeGenerator(service_time);
+	} else if (service_time_distribution.equals("lognormal")) {
+	    stg = new LognormalServiceTimeGenerator(service_time, var_service_time);
 	}	
 	stg.setSeed(simulation_seed + 1);
 	bs = new BaseStation(tg, stg);	
